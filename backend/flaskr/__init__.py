@@ -27,17 +27,41 @@ def create_app(test_config=None):
     return response
     
   '''
-  @TODO: Use the after_request decorator to set Access-Control-Allow
+  @TODO_DONE: Use the after_request decorator to set Access-Control-Allow
   '''
 
+  @app.route('/categories')
+  def get_categories():
+    # page = request.args.get('page', 1, type=int)
+    # start = (page - 1) * QUESTIONS_PER_PAGE
+    # end = start + QUESTIONS_PER_PAGE
+    categories = Category.query.all()
+    formatted_categories = [category.format() for category in categories]
 
+    return jsonify({
+      'success': True,
+      'categories': formatted_categories
+    })
 
   '''
-  @TODO: 
+  @TODO_DONE: 
   Create an endpoint to handle GET requests 
   for all available categories.
   '''
 
+  @app.route('/questions')
+  def get_questions():
+    page = request.args.get('page', 1, type=int)
+    start = (page - 1) * QUESTIONS_PER_PAGE
+    end = start + QUESTIONS_PER_PAGE
+    questions = Question.query.order_by(Question.id).all()
+    formatted_questions = [question.format() for question in questions]
+
+    return jsonify({
+      'success': True,
+      'questions': formatted_questions[start:end],
+      'total_questions': len(formatted_questions)
+    })
 
   '''
   @TODO: 
