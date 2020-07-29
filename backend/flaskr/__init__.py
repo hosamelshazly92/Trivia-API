@@ -64,10 +64,8 @@ def create_app(test_config=None):
     for category in categories:
       dict_categories[category.id] = category.type
 
-    print(dict_categories)
-
-    if (len(formatted_questions) == 0):
-    # if formatted_questions is None:
+    # if (len(formatted_questions) == 0):
+    if formatted_questions is None:
       abort(404)
     else:
       return jsonify({
@@ -78,7 +76,7 @@ def create_app(test_config=None):
       })
 
   '''
-  @TODO: 
+  @TODO_DONE: 
   Create an endpoint to handle GET requests for questions, 
   including pagination (every 10 questions). 
   This endpoint should return a list of questions, 
@@ -120,8 +118,29 @@ def create_app(test_config=None):
   Try using the word "title" to start. 
   '''
 
+  @app.route('/categories/<int:category_id>/questions')
+  @cross_origin()
+  def get_specific_categories(category_id):
+    category = Category.query.filter(Category.id == category_id).one_or_none()
+
+    page = request.args.get('page', 1, type=int)
+    start = (page - 1) * QUESTIONS_PER_PAGE
+    end = start + QUESTIONS_PER_PAGE
+    questions = Question.query.filter(Question.category == category.id).all()
+    formatted_questions = [question.format() for question in questions]
+
+    if category is None:
+      abort(404)
+    else:
+      return jsonify({
+        'success': True,
+        'current_category': category.type,
+        'questions': formatted_questions,
+        'total_questions': len(formatted_questions)
+      })
+
   '''
-  @TODO: 
+  @TODO_DONE: 
   Create a GET endpoint to get questions based on category. 
 
   TEST: In the "List" tab / main screen, clicking on one of the 
