@@ -1,7 +1,7 @@
 import os
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 import random
 
 from models import setup_db, Question, Category
@@ -21,9 +21,10 @@ def create_app(test_config=None):
 
   @app.after_request
   def after_request(response):
-    response.headers.add('Access-Control-Allow-Origins', 'Content-Type, Authorization')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS')
+    response.headers.add('Access-Control-Allow-Origins', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
     return response
     
   '''
@@ -31,6 +32,7 @@ def create_app(test_config=None):
   '''
 
   @app.route('/categories')
+  @cross_origin()
   def get_categories():
     categories = Category.query.order_by(Category.id).all()
     formatted_categories = [category.format() for category in categories]
@@ -47,6 +49,7 @@ def create_app(test_config=None):
   '''
 
   @app.route('/questions')
+  @cross_origin()
   def get_questions():
     page = request.args.get('page', 1, type=int)
     start = (page - 1) * QUESTIONS_PER_PAGE
@@ -54,14 +57,25 @@ def create_app(test_config=None):
     questions = Question.query.order_by(Question.id).all()
     formatted_questions = [question.format() for question in questions]
 
-    if (len(formatted_questions) == 0):
-      abort(404)
+    categories = Category.query.order_by(Category.id).all()
+    formatted_categories = [category.format() for category in categories]
 
-    return jsonify({
-      'success': True,
-      'questions': formatted_questions[start:end],
-      'total_questions': len(formatted_questions),
-    })
+    dict_categories = {}
+    for category in categories:
+      dict_categories[category.id] = category.type
+
+    print(dict_categories)
+
+    if (len(formatted_questions) == 0):
+    # if formatted_questions is None:
+      abort(404)
+    else:
+      return jsonify({
+        'success': True,
+        'questions': formatted_questions[start:end],
+        'total_questions': len(formatted_questions),
+        'categories': dict_categories
+      })
 
   '''
   @TODO: 
