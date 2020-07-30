@@ -16,7 +16,7 @@ def create_app(test_config=None):
   CORS(app, resources={r"/api/*": {"origins": "*"}})
   
   '''
-  @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
+  @TODO_DONE: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
   '''
 
   @app.after_request
@@ -93,8 +93,41 @@ def create_app(test_config=None):
   Clicking on the page numbers should update the questions. 
   '''
 
+  @app.route('/questions/<int:question_id>', methods=['DELETE'])
+  @cross_origin()
+  def delete_question(question_id):
+    try:
+      question = Question.query.filter(Question.id == question_id).one_or_none()
+
+      if question is None:
+        abort(404)
+
+      question.delete()
+      page = request.args.get('page', 1, type=int)
+      start = (page - 1) * QUESTIONS_PER_PAGE
+      end = start + QUESTIONS_PER_PAGE
+      questions = Question.query.order_by(Question.id).all()
+      formatted_questions = [question.format() for question in questions]
+
+      categories = Category.query.order_by(Category.id).all()
+      formatted_categories = [category.format() for category in categories]
+
+      dict_categories = {}
+      for category in categories:
+        dict_categories[category.id] = category.type
+
+      return jsonify({
+        'success': True,
+        'questions': formatted_questions[start:end],
+        'total_questions': len(formatted_questions),
+        'categories': dict_categories
+      })
+
+    except:
+      abort(422)
+
   '''
-  @TODO: 
+  @TODO_DONE: 
   Create an endpoint to DELETE question using a question ID. 
 
   TEST: When you click the trash icon next to a question, the question will be removed.
@@ -106,7 +139,6 @@ def create_app(test_config=None):
   def post_questions():
   
     body = request.get_json()
-    print(f'==========> {body}')
 
     try:
       question = body.get('question')
@@ -126,7 +158,7 @@ def create_app(test_config=None):
       abort(400)
 
   '''
-  @TODO: 
+  @TODO_DONE: 
   Create an endpoint to POST a new question, 
   which will require the question and answer text, 
   category, and difficulty score.
