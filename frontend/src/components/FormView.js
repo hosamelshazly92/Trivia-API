@@ -17,10 +17,10 @@ class FormView extends Component {
 
   componentDidMount(){
     $.ajax({
-      url: `/categories`, //TODO: update request URL
+      url: `http://localhost:5000/categories`, //TODO_DONE: update request URL
       type: "GET",
       success: (result) => {
-        this.setState({ categories: result.categories })
+        this.setState({ categories: result.list_categories })
         return;
       },
       error: (error) => {
@@ -30,11 +30,10 @@ class FormView extends Component {
     })
   }
 
-
   submitQuestion = (event) => {
     event.preventDefault();
     $.ajax({
-      url: '/questions', //TODO: update request URL
+      url: 'http://localhost:5000/questions', //TODO_DONE: update request URL
       type: "POST",
       dataType: 'json',
       contentType: 'application/json',
