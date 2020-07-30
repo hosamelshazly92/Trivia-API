@@ -134,7 +134,7 @@ def create_app(test_config=None):
   This removal will persist in the database and when you refresh the page. 
   '''
 
-  @app.route('/questions', methods=['POST'])
+  @app.route('/add', methods=['POST'])
   @cross_origin()
   def post_questions():
   
@@ -168,8 +168,41 @@ def create_app(test_config=None):
   of the questions list in the "List" tab.  
   '''
 
+  @app.route('/questions', methods=['POST'])
+  @cross_origin()
+  def search_questions():
+
+    body = request.get_json()
+
+    try:
+      searchTerm = body.get('searchTerm')
+
+      page = request.args.get('page', 1, type=int)
+      start = (page - 1) * QUESTIONS_PER_PAGE
+      end = start + QUESTIONS_PER_PAGE
+      questions = Question.query.filter(Question.question.ilike('%' + searchTerm + '%')).all()
+      # order_by(Question.id)
+      formatted_questions = [question.format() for question in questions]
+
+      categories = Category.query.order_by(Category.id).all()
+      formatted_categories = [category.format() for category in categories]
+
+      dict_categories = {}
+      for category in categories:
+        dict_categories[category.id] = category.type
+
+      return jsonify({
+        'success': True,
+        'questions': formatted_questions[start:end],
+        'total_questions': len(formatted_questions),
+        'categories': dict_categories
+      })
+
+    except:
+      abort(400)
+
   '''
-  @TODO: 
+  @TODO_DONE: 
   Create a POST endpoint to get questions based on a search term. 
   It should return any questions for whom the search term 
   is a substring of the question. 
