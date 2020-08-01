@@ -242,9 +242,41 @@ def create_app(test_config=None):
   category to be shown. 
   '''
 
+  @app.route('/play', methods=['POST'])
+  @cross_origin()
+  def play():
+    
+    body = request.get_json()
+    
+    try:
+      quiz_category = body.get('quiz_category')
+      previous_questions = body.get('previous_questions')
+      print(f'==========> {quiz_category}')
+      
+      if (quiz_category["id"] == 0):
+        questions = Question.query.order_by(Question.id).all()
+        previous_questions = [question.format() for question in questions]
+
+        current_question = random.choice(previous_questions)
+      else:
+        questions = Question.query.filter(Question.category == quiz_category["id"]).all()
+        previous_questions = [question.format() for question in questions]
+        
+        current_question = random.choice(previous_questions)
+        print(f'==========> {current_question}')
+        print(f'==========> {current_question["answer"]}')
+
+      return jsonify({
+        'success': True,
+        'previousQuestion': previous_questions,
+        'question': current_question
+      })
+
+    except:
+      abort(400)
 
   '''
-  @TODO: 
+  @TODO_DONE: 
   Create a POST endpoint to get questions to play the quiz. 
   This endpoint should take category and previous question parameters 
   and return a random questions within the given category, 
