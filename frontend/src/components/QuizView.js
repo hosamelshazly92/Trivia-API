@@ -36,7 +36,6 @@ class QuizView extends Component {
   }
 
   selectCategory = ({type, id=0}) => {
-    // console.log("==========>" + this.state);
     this.setState({quizCategory: {type, id}}, this.getNextQuestion)
   }
 
@@ -83,8 +82,8 @@ class QuizView extends Component {
 
   submitGuess = (event) => {
     event.preventDefault();
-    // const formatGuess = this.state.guess.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").toLowerCase()
-    const formatGuess = this.state.guess.replace(/[.,/#!$%^&*;:{}=\-_`~()]/g,"").toLowerCase()
+    console.log("==========> guess: " + this.state.guess)
+    const formatGuess = this.state.guess.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").toLowerCase()
     let evaluate =  this.evaluateAnswer()
     this.setState({
       numCorrect: !evaluate ? this.state.numCorrect : this.state.numCorrect + 1,
@@ -136,15 +135,16 @@ class QuizView extends Component {
   }
 
   evaluateAnswer = () => {
-    // const formatGuess = this.state.guess.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").toLowerCase()
-    const formatGuess = this.state.guess.replace(/[.,/#!$%^&*;:{}=\-_`~()]/g,"").toLowerCase()
-    const answerArray = this.state.currentQuestion.answer.toLowerCase().split(' ');
-    return answerArray.includes(formatGuess)
+    const formatGuess = this.state.guess.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").toLowerCase()
+    // const answerArray = this.state.currentQuestion.answer.toLowerCase().split(' ');
+    // console.log("==========> answer: " + answerArray)
+    const answer = this.state.currentQuestion.answer.toLowerCase();
+    console.log("==========> answer: " + answer)
+    return answer.includes(formatGuess)
   }
 
   renderCorrectAnswer(){
-    // const formatGuess = this.state.guess.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").toLowerCase()
-    const formatGuess = this.state.guess.replace(/[.,/#!$%^&*;:{}=\-_`~()]/g,"").toLowerCase()
+    const formatGuess = this.state.guess.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").toLowerCase()
     let evaluate =  this.evaluateAnswer()
     return(
       <div className="quiz-play-holder">

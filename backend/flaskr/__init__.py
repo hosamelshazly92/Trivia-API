@@ -22,7 +22,7 @@ def create_app(test_config=None):
   @app.after_request
   def after_request(response):
     response.headers.add('Access-Control-Allow-Origins', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, true')
     response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
     response.headers.add('Access-Control-Allow-Credentials', 'true')
     return response
@@ -34,6 +34,9 @@ def create_app(test_config=None):
   @app.route('/categories')
   @cross_origin()
   def get_categories():
+    page = request.args.get('page', 1, type=int)
+    start = (page - 1) * QUESTIONS_PER_PAGE
+    end = start + QUESTIONS_PER_PAGE
     categories = Category.query.order_by(Category.id).all()
     formatted_categories = [category.format() for category in categories]
 
@@ -41,11 +44,16 @@ def create_app(test_config=None):
     for category in categories:
       dict_categories[category.id] = category.type
 
-    return jsonify({
-      'success': True,
-      'categories': formatted_categories,
-      'list_categories': dict_categories
-    })
+    paginate_categories = formatted_categories[start:end]
+
+    if len(paginate_categories) == 0:
+      abort(404)
+    else:
+      return jsonify({
+        'success': True,
+        'categories': paginate_categories,
+        'list_categories': dict_categories
+      })
 
   '''
   @TODO_DONE: 
@@ -69,14 +77,15 @@ def create_app(test_config=None):
     for category in categories:
       dict_categories[category.id] = category.type
 
-    # if (len(formatted_questions) == 0):
-    if formatted_questions is None:
+    paginate_questions = formatted_questions[start:end]
+
+    if len(paginate_questions) == 0:
       abort(404)
     else:
       return jsonify({
         'success': True,
-        'questions': formatted_questions[start:end],
-        'total_questions': len(formatted_questions),
+        'questions': paginate_questions,
+        'total_questions': len(paginate_questions),
         'categories': dict_categories
       })
 
@@ -103,6 +112,7 @@ def create_app(test_config=None):
         abort(404)
 
       question.delete()
+
       page = request.args.get('page', 1, type=int)
       start = (page - 1) * QUESTIONS_PER_PAGE
       end = start + QUESTIONS_PER_PAGE
@@ -118,6 +128,7 @@ def create_app(test_config=None):
 
       return jsonify({
         'success': True,
+        'deleted': question_id,
         'questions': formatted_questions[start:end],
         'total_questions': len(formatted_questions),
         'categories': dict_categories
@@ -140,22 +151,30 @@ def create_app(test_config=None):
   
     body = request.get_json()
 
-    try:
-      question = body.get('question')
-      answer = body.get('answer')
-      difficulty = body.get('difficulty')
-      category = body.get('category')
+    question = body.get('question', None)
+    answer = body.get('answer', None)
+    difficulty = body.get('difficulty')
+    category = body.get('category')
 
+    try:
       new_question = Question(question=question, answer=answer, difficulty=difficulty, category=category)
       
       new_question.insert()
 
+      page = request.args.get('page', 1, type=int)
+      start = (page - 1) * QUESTIONS_PER_PAGE
+      end = start + QUESTIONS_PER_PAGE
+      questions = Question.query.order_by(Question.id).all()
+      formatted_questions = [question.format() for question in questions]
+
       return jsonify({
-        'success': True
+        'success': True,
+        'created': new_question.id,
+        'total_questions': len(formatted_questions)
       })
     
     except:
-      abort(400)
+      abort(422)
 
   '''
   @TODO_DONE: 
@@ -287,8 +306,48 @@ def create_app(test_config=None):
   and shown whether they were correct or not. 
   '''
 
+  @app.errorhandler(400)
+  def bad_request(error):
+    return jsonify ({
+      'success': False,
+      'error': 400,
+      'message': "bad request"
+    }), 400
+
+  @app.errorhandler(404)
+  def not_found(error):
+    return jsonify ({
+      'success': False,
+      'error': 404,
+      'message': "resource not found"
+    }), 404
+
+  @app.errorhandler(405)
+  def not_allowed(error):
+    return jsonify ({
+      'success': False,
+      'error': 405,
+      'message': "method not allowed"
+    }), 405
+
+  @app.errorhandler(422)
+  def unprocessable(error):
+    return jsonify ({
+      'success': False,
+      'error': 422,
+      'message': "unprocessable"
+    }), 422
+
+  @app.errorhandler(500)
+  def sever_error(error):
+    return jsonify ({
+      'success': False,
+      'error': 500,
+      'message': "internal server error"
+    }), 500
+
   '''
-  @TODO: 
+  @TODO_DONE: 
   Create error handlers for all expected errors 
   including 404 and 422. 
   '''
