@@ -200,7 +200,6 @@ def create_app(test_config=None):
       start = (page - 1) * QUESTIONS_PER_PAGE
       end = start + QUESTIONS_PER_PAGE
       questions = Question.query.filter(Question.question.ilike('%' + searchTerm + '%')).all()
-      # order_by(Question.id)
       formatted_questions = [question.format() for question in questions]
 
       categories = Category.query.order_by(Category.id).all()
@@ -218,7 +217,7 @@ def create_app(test_config=None):
       })
 
     except:
-      abort(400)
+      abort(422)
 
   '''
   @TODO_DONE: 
