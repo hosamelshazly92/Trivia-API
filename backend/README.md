@@ -72,14 +72,16 @@ This README is missing documentation of your endpoints. Below is an example for 
 
 Endpoints
 GET '/categories'
-GET ...
-POST ...
-DELETE ...
+GET '/questions'
+POST '/questions'
+POST '/add'
+DELETE '/questions/<int:question_id>'
 
 GET '/categories'
 - Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
 - Request Arguments: None
-- Returns: An object with a single key, categories, that contains a object of id: category_string key:value pairs. 
+- Returns: An object with a single key, categories, that contains a object of id: category_string key:value pairs.
+- curl http://localhost:5000/categories
 {'1' : "Science",
 '2' : "Art",
 '3' : "Geography",
@@ -87,9 +89,104 @@ GET '/categories'
 '5' : "Entertainment",
 '6' : "Sports"}
 
+GET '/questions'
+- Fetches a list of questions in which each question is a dictionary, and the total number of questions is 10 per page
+- Request Arguments: None
+- Request Parameters: page
+- Returns: Each question is an object with id, question, answer, categories and difficulty as keys and their value pairs.
+- curl http://localhost:5000/questions or curl http://localhost:5000/questions?page=1
+{"answer": "The Palace of Versailles",
+"category": 3,
+"difficulty": 3,
+"id": 14,
+"question": "In which royal palace would you find the Hall of Mirrors?"}
+
+POST '/questions'
+- Search for questions using a search word. Returns a list of questions in which each question is a dictionary, and the total number of questions.
+- Request Arguments: None
+- Returns: Questions with the search word, each question is an object with id, question, answer, categories and difficulty as keys and their value pairs.
+- curl -X POST -H 'Content-Type: application/json' -d '{"searchTerm":"days"}' http://localhost:5000/questions
+{"answer": "The Palace of Versailles",
+"category": 3,
+"difficulty": 3,
+"id": 14,
+"question": "In which royal palace would you find the Hall of Mirrors?"}
+
+POST '/add'
+- Add new questions by inserting question, answer, category and difficulty. Returns a dictionary of the question in the form of key value pairs.
+- Request Arguments: None
+- Returns: The newly added question id and the final total number of questions.
+- curl -X POST -H 'Content-Type: application/json' -d '{"answer":"365 day","question":"How many days in the year?","category":1,"difficulty":"1"}' http://localhost:5000/add
+{"success": True,
+"created": 25,
+"total_questions": 21}
+
+DELETE '/questions/25'
+- DELETE a question by question id, answer.
+- Request Arguments: question id
+- Returns: The deleted question id and the final total number of questions.
+- curl -X DELETE http://localhost:5000/questions/25
+{"success": True,
+"created": 25,
+"total_questions": 20}
+
+POST '/play'
+- Add new questions by inserting question, answer, category and difficulty. Returns a dictionary of the question in the form of key value pairs.
+- Request Arguments: None
+- Returns: The newly added question id and the final total number of questions.
+- curl -X POST -H 'Content-Type: application/json' -d '{"answer":"365 day","question":"How many days in the year?","category":1,"difficulty":"1"}' http://localhost:5000/add
+{"success": True,
+"created": 25,
+"total_questions": 21}
 ```
+Errors
+400 bad request
+404 resource not found
+405 method not allowed
+422 unprocessable
+500 internal server error
 
+400
+- Error Type: Bad request
+- Error description: The server cannot process the request due to a client error
+- Returns: JSON dictionary object
+{'success': False,
+'error': 400,
+'message': 'bad request'}
 
+404
+- Error Type: Not found
+- Error description: The requested resource could not be found
+- Returns: JSON dictionary object
+{'success': False,
+'error': 404,
+'message': 'resource not found'}
+
+405
+- Error Type: Not allowed
+- Error description: A request method is not supported for the requested resource
+- Returns: JSON dictionary object
+{'success': False,
+'error': 405,
+'message': 'method not allowed'}
+
+422
+- Error Type: Unprocessable
+- Error description: The request was well-formed but was unable to be followed due to semantic errors
+- Returns: JSON dictionary object
+{'success': False,
+'error': 422,
+'message': 'unprocessable'}
+
+500
+- Error Type: Server error
+- Error description: This error indicates there is an error in the backend
+- Returns: JSON dictionary object
+{'success': False,
+'error': 500,
+'message': 'internal server error'}
+
+```
 ## Testing
 To run the tests, run
 ```
