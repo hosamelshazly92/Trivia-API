@@ -45,7 +45,6 @@ def create_app(test_config=None):
 
         return jsonify({
             'success': True,
-            # 'categories': formatted_categories,
             'list_categories': dict_categories
         })
 
@@ -107,27 +106,13 @@ def create_app(test_config=None):
 
             question.delete()
 
-            # page = request.args.get('page', 1, type=int)
-            # start = (page - 1) * QUESTIONS_PER_PAGE
-            # end = start + QUESTIONS_PER_PAGE
             questions = Question.query.order_by(Question.id).all()
             formatted_questions = [question.format() for question in questions]
-            # paginate_questions = formatted_questions[start:end]
-
-            # categories = Category.query.order_by(Category.id).all()
-            # formatted_categories = [category.format()
-            #                         for category in categories]
-
-            # dict_categories = {}
-            # for category in categories:
-            #     dict_categories[category.id] = category.type
 
             return jsonify({
                 'success': True,
                 'deleted': question_id,
-                # 'questions': paginate_questions,
                 'total_questions': len(formatted_questions)
-                # 'categories': dict_categories
             })
 
         except Exception:
@@ -208,7 +193,6 @@ def create_app(test_config=None):
                 'success': True,
                 'questions': paginate_questions,
                 'total_questions': len(formatted_questions)
-                # 'categories': dict_categories
             })
         except Exception:
             abort(422)
