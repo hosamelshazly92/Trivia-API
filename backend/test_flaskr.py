@@ -15,7 +15,8 @@ class TriviaTestCase(unittest.TestCase):
         self.app = create_app()
         self.client = self.app.test_client
         self.database_name = "trivia_test"
-        self.database_path = "postgres://admin:0008@{}/{}".format('localhost:5432', self.database_name)
+        self.database_path = "postgres://admin:0008@{}/{}".format(
+            'localhost:5432', self.database_name)
         setup_db(self.app, self.database_path)
 
         # binds the app to the current context
@@ -31,7 +32,7 @@ class TriviaTestCase(unittest.TestCase):
             'difficulty': 1,
             'question': 'Who invented Cubism?'
         }
-    
+
     def tearDown(self):
         """Executed after each test"""
         pass
@@ -44,7 +45,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
         self.assertEqual(len(data['questions']), 10)
-        self.assertEqual(data['total_questions'], 10)
+        self.assertEqual(data['total_questions'], 19)
 
     def test_404_sent_requesting_beyond_valid_page(self):
         res = self.client().get('/questions?page=100')
@@ -53,7 +54,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'resource not found')
-    
+
     # test add endpoint
     def test_add_question(self):
         res = self.client().post('/add', json=self.new_question)
@@ -71,16 +72,15 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['message'], 'method not allowed')
 
     # test delete endpoint
-    # change question id to 31 to run the delete test successfully
     def test_delete_question(self):
-        res = self.client().delete('/questions/32')
+        res = self.client().delete('/questions/20')
         data = json.loads(res.data)
 
-        question = Question.query.filter(Question.id == 32).one_or_none()
+        question = Question.query.filter(Question.id == 20).one_or_none()
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
-        self.assertEqual(data['deleted'], 32)
+        self.assertEqual(data['deleted'], 20)
         self.assertEqual(question, None)
 
     def test_405_question_does_not_exist(self):
@@ -111,8 +111,8 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['total_questions'], 0)
 
     """
-    TODO_DONE
-    Write at least one test for each test for successful operation and for expected errors.
+    TODO_DONE: Write at least one test for each test for successful operation
+    and for expected errors.
     """
 
 
